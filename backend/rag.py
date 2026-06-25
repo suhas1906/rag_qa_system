@@ -19,17 +19,16 @@ Top-k choice: 4
   questions.
 
 Embedding model : all-MiniLM-L6-v2 (sentence-transformers)
-LLM : Anthropic claude-sonnet-4-6
+LLM : Groq llama-3.3-70b-versatile (free)
 """
 
 import os
 import re
 import time
 from pathlib import Path
-from typing import Optional
 
-import anthropic
 import chromadb
+from groq import Groq
 from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
 
@@ -52,7 +51,7 @@ NOT_FOUND_SIGNAL = "ANSWER_NOT_IN_DOCUMENT"
 _embedder = None
 _chroma_client = None
 _collection = None
-_anthropic_client = None
+_groq_client = None
 
 
 def _get_embedder() -> SentenceTransformer:
@@ -74,11 +73,11 @@ def _get_collection():
     return _collection
 
 
-def _get_anthropic() -> anthropic.Anthropic:
-    global _anthropic_client
-    if _anthropic_client is None:
-        _anthropic_client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-    return _anthropic_client
+def _get_groq() -> Groq:
+    global _groq_client
+    if _groq_client is None:
+        _groq_client = Groq(api_key=os.environ["GROQ_API_KEY"])
+    return _groq_client
 
 
 # ---------------------------------------------------------------------------
@@ -241,14 +240,14 @@ def answer_query(query: str) -> dict:
     chunks = _retrieve(query)
     prompt = _build_prompt(query, chunks)
 
-    client = _get_anthropic()
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1024,
+    client = _get_groq()
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
+        max_tokens=1024,
     )
 
-    raw_answer = message.content[0].text.strip()
+    raw_answer = response.choices[0].message.content.strip()
     answer_found = NOT_FOUND_SIGNAL not in raw_answer
 
     if not answer_found:

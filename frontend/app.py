@@ -40,7 +40,7 @@ with st.sidebar:
                 st.error("Cannot reach the FastAPI backend. Is it running?")
 
     st.markdown("---")
-    st.caption("Built with FastAPI · ChromaDB · sentence-transformers · Claude")
+    
 
 # ---------------------------------------------------------------------------
 # Tabs

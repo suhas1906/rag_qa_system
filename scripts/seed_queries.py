@@ -77,7 +77,7 @@ def main():
                 print(f"[{i:02d}] ERROR {resp.status_code}: {resp.text[:80]}")
         except Exception as exc:
             print(f"[{i:02d}] EXCEPTION: {exc}")
-        time.sleep(0.5)
+        time.sleep(3)
 
     print("\nDone! Check the analytics dashboard.")
 
